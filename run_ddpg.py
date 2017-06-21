@@ -7,7 +7,7 @@ from utils.normalized_env import NormalizedEnv
 from agents.ddpg_low_dim import DDPG
 from ddpg_learning import ddpg_learning
 
-NUM_EPISODES = 250
+NUM_EPISODES = 5000
 BATCH_SIZE = 64
 GAMMA = 0.99
 REPLAY_BUFFER_SIZE = 1000000
@@ -17,6 +17,7 @@ Q_WEIGHT_DECAY = 0.01
 TAU = 0.001
 THETA = 0.15
 SIGMA = 0.2
+LOG_EVERY_N_EPS = 10
 
 """
     OptimizerSpec containing following attributes
@@ -55,4 +56,5 @@ stats = ddpg_learning(
     agent=agent,
     num_episodes=NUM_EPISODES,
     gamma=GAMMA,
+    log_every_n_eps=LOG_EVERY_N_EPS,
 )

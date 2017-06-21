@@ -3,42 +3,31 @@ import numpy as np
 import pandas as pd
 from collections import namedtuple
 from matplotlib import pyplot as plt
+import visdom
 
-EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards"])
+vis = visdom.Visdom()
 
-def plot_episode_stats(stats, smoothing_window=10, noshow=False):
-    # Plot the episode length over time
-    fig1 = plt.figure(figsize=(10,5))
-    plt.plot(stats.episode_lengths)
-    plt.xlabel("Epsiode")
-    plt.ylabel("Epsiode Length")
-    plt.title("Episode Length over Time")
-    if noshow:
-        plt.close(fig1)
-    else:
-        plt.show(fig1)
+EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards", "mean_rewards"])
 
-    # Plot the episode reward over time
-    fig2 = plt.figure(figsize=(10,5))
-    rewards_smoothed = pd.Series(stats.episode_rewards).rolling(smoothing_window, min_periods=smoothing_window).mean()
-    plt.plot(rewards_smoothed)
-    plt.xlabel("Epsiode")
-    plt.ylabel("Epsiode Reward (Smoothed)")
-    plt.title("Episode Reward over Time (Smoothed over window size {})".format(smoothing_window))
-    if noshow:
-        plt.close(fig2)
-    else:
-        plt.show(fig2)
+def plot_episode_stats(stats):
+    # Plot the mean of last 100 episode rewards over time.
+    vis.line(X=np.arange(len(stats.mean_rewards)),
+             Y=np.array(stats.mean_rewards),
+             win="DDPG MEAN REWARD (100 episodes)",
+             opts=dict(
+                title=("DDPG MEAN REWARD (100 episodes)"),
+                ylabel="MEAN REWARD (100 episodes)",
+                xlabel="Episode"
+                )
+             )
 
-    # Plot time steps and episode number
-    fig3 = plt.figure(figsize=(10,5))
-    plt.plot(np.cumsum(stats.episode_lengths), np.arange(len(stats.episode_lengths)))
-    plt.xlabel("Time Steps")
-    plt.ylabel("Episode")
-    plt.title("Episode per time step")
-    if noshow:
-        plt.close(fig3)
-    else:
-        plt.show(fig3)
-
-    return fig1, fig2, fig3
+    # Plot time steps and episode number.
+    vis.line(X=np.cumsum(stats.episode_lengths),
+             Y=np.arange(len(stats.episode_lengths)),
+             win="DDPG Episode per time step",
+             opts=dict(
+                title=("DDPG Episode per time step"),
+                ylabel="Episode",
+                xlabel="Time Steps"
+                )
+             )
